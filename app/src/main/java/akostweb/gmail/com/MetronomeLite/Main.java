@@ -1,6 +1,7 @@
 package akostweb.gmail.com.MetronomeLite;
 
 import android.app.Activity;
+import android.content.Context;
 import android.media.AudioManager;
 import android.media.SoundPool;
 import android.os.Bundle;
@@ -44,7 +45,7 @@ public class Main extends Activity {
         sp = new SoundPool(4, AudioManager.STREAM_MUSIC, 0);
 
 
-        am = (AudioManager) getSystemService(AUDIO_SERVICE);
+        am = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
         float currentVolumeIndex = (float) am.getStreamVolume(streamType);
         float maxVolumeIndex = (float) am.getStreamMaxVolume(streamType);
         this.volume = currentVolumeIndex / maxVolumeIndex;
@@ -52,6 +53,7 @@ public class Main extends Activity {
         this.sp = new SoundPool(MAX_STREAMS, AudioManager.STREAM_MUSIC, 1);
         soundShort = this.sp.load(this, R.raw.aaaa, 1);
         soundSmall = this.sp.load(this, R.raw.ddddddd, 1);
+        am.adjustStreamVolume(AudioManager.STREAM_MUSIC, AudioManager.ADJUST_SAME, AudioManager.FLAG_SHOW_UI);
 
         sp.setOnLoadCompleteListener(new SoundPool.OnLoadCompleteListener() {
             @Override

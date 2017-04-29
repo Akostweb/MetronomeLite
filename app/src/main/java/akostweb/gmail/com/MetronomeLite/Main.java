@@ -1,188 +1,111 @@
 package akostweb.gmail.com.MetronomeLite;
 
 import android.app.Activity;
-import android.content.Context;
-import android.media.AudioManager;
-import android.media.SoundPool;
+import android.net.Uri;
 import android.os.Bundle;
-import android.util.Log;
+import android.os.Handler;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.SeekBar;
 import android.widget.Spinner;
 import android.widget.TextView;
 
+import com.google.android.gms.ads.AdRequest;
+import com.google.android.gms.ads.AdView;
+import com.google.android.gms.ads.MobileAds;
+import com.google.android.gms.appindexing.Action;
+import com.google.android.gms.appindexing.AppIndex;
+import com.google.android.gms.appindexing.Thing;
+import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.firebase.analytics.FirebaseAnalytics;
 
 
 public class Main extends Activity {
 
+    private FirebaseAnalytics mFirebaseAnalytics;
 
+    public static final int STEP = 50;
+    public static final int CHANGE_PICTURE = 15;
+    public static final int CHANGE_AXE = 41;
+
+    public boolean change, changeaxe, spinnerChanged;
+    public ImageView imageView;
     public TextView mTextValue;
     public boolean stopper = true;
-    public boolean loaded;
     public Button btnPlay, btnStop;
-    public SeekBar seekBar;
-    public int nomer, vibor, time, times;
+    public SeekBar seekBar, seekBarChanger;
+    public int nomer, vibor, time, times, stopTouch, tik;
 
-    private static final String TAG = "MyTest";
+    public SoundPlayer soundPlayer;
 
-    public SoundPool sp;
-    public AudioManager am;
-    private static final int MAX_STREAMS = 1;
-    private static final int streamType = AudioManager.STREAM_MUSIC;
-    int soundShort, soundSmall;
-    private float volume;
 
     String[] data = {"2/4", "3/4", "4/4", "5/4", "7/4", "3/8", "5/8", "6/8", "7/8", "9/8", "12/8"};
+    /**
+     * ATTENTION: This was auto-generated to implement the App Indexing API.
+     * See https://g.co/AppIndexing/AndroidStudio for more information.
+     */
+    private GoogleApiClient client;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        sp = new SoundPool(4, AudioManager.STREAM_MUSIC, 0);
+        MobileAds.initialize(getApplicationContext(), "ca-app-pub-4750718940737434~5012194903");
 
+        AdView mAdView = (AdView) findViewById(R.id.adView);
+        AdRequest adRequest = new AdRequest.Builder().build();
+        mAdView.loadAd(adRequest);
 
-        am = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
-        float currentVolumeIndex = (float) am.getStreamVolume(streamType);
-        float maxVolumeIndex = (float) am.getStreamMaxVolume(streamType);
-        this.volume = currentVolumeIndex / maxVolumeIndex;
-        this.setVolumeControlStream(streamType);
-        this.sp = new SoundPool(MAX_STREAMS, AudioManager.STREAM_MUSIC, 1);
-        soundShort = this.sp.load(this, R.raw.aaaa, 1);
-        soundSmall = this.sp.load(this, R.raw.ddddddd, 1);
-        am.adjustStreamVolume(AudioManager.STREAM_MUSIC, AudioManager.ADJUST_SAME, AudioManager.FLAG_SHOW_UI);
+        mFirebaseAnalytics = FirebaseAnalytics.getInstance(this);
 
-        sp.setOnLoadCompleteListener(new SoundPool.OnLoadCompleteListener() {
-            @Override
-            public void onLoadComplete(SoundPool soundPool, int sampleId, int status) {
-                loaded = true;
-                Log.i(TAG, "Загруженно");
+        Bundle bundle = new Bundle();
+        bundle.putString(FirebaseAnalytics.Param.ITEM_ID, "id");
+        bundle.putString(FirebaseAnalytics.Param.ITEM_NAME, "name");
+        bundle.putString(FirebaseAnalytics.Param.CONTENT_TYPE, "image");
+        mFirebaseAnalytics.logEvent(FirebaseAnalytics.Event.SELECT_CONTENT, bundle);
 
-            }
-        });
-
+        mTextValue = (TextView) findViewById(R.id.tvProgressSpin);
         btnPlay = (Button) findViewById(R.id.btnPlay);
-        btnPlay.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                btnPlay.setEnabled(false);
-                if (times == 0) {
-                    times = Integer.parseInt(mTextValue.getText().toString()) + 1;
-                } else {
-                    times = Integer.parseInt(mTextValue.getText().toString());
-                }
-
-                final float leftVolumn = volume;
-                final float rightVolumn = volume;
-                vibor = 0;
-
-                if (nomer == 0) {
-                    vibor = 2;
-                    time = 1;
-                } else if (nomer == 1) {
-                    vibor = 3;
-                    time = 1;
-                } else if (nomer == 2) {
-                    vibor = 4;
-                    time = 1;
-                } else if (nomer == 3) {
-                    vibor = 5;
-                    time = 1;
-                } else if (nomer == 4) {
-                    vibor = 7;
-                    time = 1;
-                } else if (nomer == 5) {
-                    vibor = 3;
-                    time = 2;
-                } else if (nomer == 6) {
-                    vibor = 5;
-                    time = 2;
-                } else if (nomer == 7) {
-                    vibor = 6;
-                    time = 2;
-                } else if (nomer == 8) {
-                    vibor = 7;
-                    time = 2;
-                } else if (nomer == 9) {
-                    vibor = 9;
-                    time = 2;
-                } else {
-                    vibor = 12;
-                    time = 2;
-                }
-
-                new Thread(new Runnable() {
-                    @Override
-                    public void run() {
-                        if (times == 0) {
-                            times = times + 1;
-                        }
-                        stopper = true;
-                        do {
-                            if(!stopper){
-
-                            }else {
-                                sp.play(soundShort, leftVolumn, rightVolumn, 1, 0, 1);
-                                try {
-                                    Thread.sleep(60000 / times / time);
-                                } catch (InterruptedException e) {
-                                    e.printStackTrace();
-                                }
-                            }
-
-                            if (!stopper) {
-                            } else {
-                                for (int i = 1; i < vibor; i++) {
-                                    sp.play(soundSmall, leftVolumn, rightVolumn, 1, 0, 1);
-                                    try {
-                                        Thread.sleep(60000 / times / time);
-                                    } catch (InterruptedException e) {
-                                        e.printStackTrace();
-                                    }
-                                }
-                            }
-                        } while (stopper);
-                    }
-                }).start();
-            }
-        });
-
         btnStop = (Button) findViewById(R.id.btnStop);
-        btnStop.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                btnPlay.setEnabled(true);
-                stopper = false;
-            }
-        });
 
-        Spinner spinner = (Spinner) findViewById(R.id.spinner);
+        final Spinner spinner = (Spinner) findViewById(R.id.spinner);
 
         ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, R.layout.row, R.id.spinnerColor, data);
         spinner.setAdapter(adapter);
 
+        seekBarChanger = (SeekBar) findViewById(R.id.seekBarChanger);
+        seekBarChanger.setProgress(0);
 
-        mTextValue = (TextView) findViewById(R.id.textView2);
+        imageView = (ImageView) findViewById(R.id.imageView);
 
         seekBar = (SeekBar) findViewById(R.id.seekBar);
         seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-                mTextValue.setText(String.valueOf(seekBar.getProgress()));
                 times = progress;
+                mTextValue.setText(String.valueOf(seekBar.getProgress()));
+
             }
 
             @Override
             public void onStartTrackingTouch(SeekBar seekBar) {
-
             }
 
             @Override
             public void onStopTrackingTouch(SeekBar seekBar) {
-                mTextValue.setText(String.valueOf(seekBar.getProgress()));
+                stopTouch = seekBar.getProgress();
+
+                if (stopTouch != 0) {
+                    times = stopTouch;
+                    mTextValue.setText(String.valueOf(times));
+                } else {
+                    times = stopTouch + 1;
+                    mTextValue.setText(String.valueOf(times));
+                }
             }
         });
         seekBar.setProgress(40);
@@ -192,6 +115,7 @@ public class Main extends Activity {
             public void onItemSelected(AdapterView<?> parent, View view,
                                        int position, long id) {
                 nomer = position;
+                spinnerChanged = true;
             }
 
             @Override
@@ -199,8 +123,231 @@ public class Main extends Activity {
             }
         });
 
+        // ATTENTION: This was auto-generated to implement the App Indexing API.
+        // See https://g.co/AppIndexing/AndroidStudio for more information.
+        client = new GoogleApiClient.Builder(this).addApi(AppIndex.API).build();
     }
 
+    public void OnClick(View view) {
+        soundPlayer = new SoundPlayer(this);
+        switch (view.getId()) {
+            case R.id.btnPlay:
+                btnPlay.setBackgroundResource(R.drawable.woodenplaydisabled);
+                btnStop.setBackgroundResource(R.drawable.woodenstnew);
+                stopper = false;
+                btnPlay.setEnabled(false);
+                time = Takt(nomer);
+                vibor = Vibor(nomer);
+
+                final Handler handler = new Handler();
+                final Runnable updateRunner = new Runnable() {
+                    public void run() {
+                        if (change) {
+                            imageView.setBackgroundResource(R.drawable.hitred);
+                        } else {
+                            imageView.setBackgroundResource(R.drawable.hithit);
+                        }
+                    }
+                };
+
+                final Runnable updateAxe = new Runnable() {
+                    @Override
+                    public void run() {
+                        if (changeaxe) {
+                            seekBarChanger.setThumb(getResources().getDrawable(R.drawable.woodenaxelse));
+                        } else {
+                            seekBarChanger.setThumb(getResources().getDrawable(R.drawable.woodenaxezzz));
+                        }
+
+
+                    }
+                };
+
+
+                Thread thread = new Thread() {
+                    public void run() {
+                        tik = 0;
+                        while (!stopper) {
+                            if (spinnerChanged){
+                                time = Takt(nomer);
+                                vibor = Vibor(nomer);
+                                spinnerChanged = false;
+                            }
+
+                            for (int j = 0; j <= STEP; j++) {
+
+                                tik = tik + 1;
+                                try {
+                                    Thread.sleep(60000 / time / times / STEP);
+                                } catch (InterruptedException e) {
+                                    e.printStackTrace();
+                                }
+                                seekBarChanger.setProgress(tik);
+                                if (stopper){
+                                    j = STEP;
+                                }
+                                if (j == CHANGE_AXE) {
+                                    changeaxe = true;
+                                    handler.post(updateAxe);
+                                }
+                                if (j == CHANGE_PICTURE) {
+                                    change = false;
+                                    handler.post(updateRunner);
+                                }
+                                if (j == STEP) {
+                                    change = true;
+                                    handler.post(updateRunner);
+                                    seekBarChanger.setProgress(0);
+                                    tik = 0;
+
+                                }
+
+                            }
+                            changeaxe = false;
+                            handler.post(updateAxe);
+                            soundPlayer.PlaySound(1);
+                            if (spinnerChanged){
+                                time = Takt(nomer);
+                                vibor = Vibor(nomer);
+                                spinnerChanged = false;
+                            }
+
+
+                            for (int i = 1; i < vibor; i++) {
+                                if (spinnerChanged){
+                                    time = Takt(nomer);
+                                    vibor = Vibor(nomer);
+                                    spinnerChanged = false;
+                                }
+                                if (stopper) {
+                                    i = vibor;
+                                } else {
+
+                                    for (int j = 0; j <= STEP; j++) {
+
+                                        tik = tik + 1;
+                                        try {
+                                            Thread.sleep(60000 / time / times / STEP);
+                                        } catch (InterruptedException e) {
+                                            e.printStackTrace();
+                                        }
+                                        seekBarChanger.setProgress(tik);
+
+                                        if (stopper){
+                                            j = STEP;
+                                        }
+
+
+                                        if (j == CHANGE_AXE) {
+                                            changeaxe = true;
+                                            handler.post(updateAxe);
+                                        }
+
+                                        if (j == CHANGE_PICTURE) {
+                                            change = false;
+                                            handler.post(updateRunner);
+                                        }
+
+                                        if (j == STEP) {
+                                            change = true;
+                                            handler.post(updateRunner);
+                                            seekBarChanger.setProgress(0);
+                                            tik = 0;
+                                        }
+
+                                    }
+                                }
+
+                                soundPlayer.PlaySound(0);
+                                changeaxe = false;
+                                handler.post(updateAxe);
+                                if (spinnerChanged){
+                                    time = Takt(nomer);
+                                    vibor = Vibor(nomer);
+                                    spinnerChanged = false;
+                                }
+                            }
+                        }
+                    }
+                };
+
+                thread.start();
+                break;
+
+            case R.id.btnStop:
+                btnStop.setBackgroundResource(R.drawable.woodenstopdisable);
+                btnPlay.setBackgroundResource(R.drawable.woodenpl);
+                btnPlay.setEnabled(true);
+                stopper = true;
+                soundPlayer.PlaySound(0);
+                break;
+        }
+
+    }
+
+
+    public int Takt(int nomer) {
+        if (nomer <= 5) {
+            time = 1;
+        } else {
+            time = 2;
+        }
+        return time;
+    }
+
+    public int Vibor(int nomer) {
+        if (nomer <= 3) {
+            vibor = nomer + 2;
+        } else if (nomer == 4) {
+            vibor = 7;
+        } else if (nomer == 5) {
+            vibor = 3;
+        } else if (nomer >= 6 && nomer <= 8) {
+            vibor = nomer - 1;
+        } else if (nomer == 9) {
+            vibor = nomer;
+        } else {
+            vibor = 12;
+        }
+        return vibor;
+    }
+
+
+    /**
+     * ATTENTION: This was auto-generated to implement the App Indexing API.
+     * See https://g.co/AppIndexing/AndroidStudio for more information.
+     */
+    public Action getIndexApiAction() {
+        Thing object = new Thing.Builder()
+                .setName("Main Page") // TODO: Define a title for the content shown.
+                // TODO: Make sure this auto-generated URL is correct.
+                .setUrl(Uri.parse("http://[ENTER-YOUR-URL-HERE]"))
+                .build();
+        return new Action.Builder(Action.TYPE_VIEW)
+                .setObject(object)
+                .setActionStatus(Action.STATUS_TYPE_COMPLETED)
+                .build();
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+
+        // ATTENTION: This was auto-generated to implement the App Indexing API.
+        // See https://g.co/AppIndexing/AndroidStudio for more information.
+        client.connect();
+        AppIndex.AppIndexApi.start(client, getIndexApiAction());
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+
+        // ATTENTION: This was auto-generated to implement the App Indexing API.
+        // See https://g.co/AppIndexing/AndroidStudio for more information.
+        AppIndex.AppIndexApi.end(client, getIndexApiAction());
+        client.disconnect();
+    }
 }
 
 

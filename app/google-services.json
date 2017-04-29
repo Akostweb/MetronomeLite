@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "381291899928",
+    "firebase_url": "https://metronomelite.firebaseio.com",
+    "project_id": "metronomelite",
+    "storage_bucket": "metronomelite.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:381291899928:android:2dbfff3e4a32dcfd",
+        "android_client_info": {
+          "package_name": "akostweb.gmail.com.myapplication"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "381291899928-gnea2pih7i7chs3qop9on8rj7oc898r2.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBjIieAOjyL54SZ7c79zc5hiR34ATNTnpQ"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 2,
+          "other_platform_oauth_client": [
+            {
+              "client_id": "381291899928-gnea2pih7i7chs3qop9on8rj7oc898r2.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

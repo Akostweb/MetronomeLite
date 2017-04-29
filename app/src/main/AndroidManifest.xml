@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="akostweb.gmail.com.MetronomeLite"
-    android:versionCode="5"
-    android:versionName="1.4" >
+    package="akostweb.gmail.com.MetronomeLite">
+
+
 
     <application
         android:allowBackup="true"
@@ -29,8 +29,10 @@
             android:value="@integer/google_play_services_version" />
 
     </application>
-    <uses-permission android:name="android.permission.RECORD_AUDIO" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.CAPTURE_AUDIO_OUTPUT" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
 
 </manifest>
